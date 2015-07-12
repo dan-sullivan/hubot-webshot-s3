@@ -14,7 +14,8 @@
   },
   "dependencies": {
     "phantomjs": "~1.9.17",
-    "webshot": "~0.16.0"
+    "webshot": "~0.16.0",
+    "aws-sdk": "~2.1.38"
   },
   "peerDependencies": {
     "hubot": "2.x"

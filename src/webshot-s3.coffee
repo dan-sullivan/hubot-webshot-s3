@@ -13,6 +13,7 @@
 # Commands:
 #   hubot webshot <URL> <profile>
 #   hubot webshot list profiles
+#   hubot webshot describe <profile>
 #
 # Notes:
 #   Uses the following packages
@@ -43,10 +44,17 @@ profiles = {
 }
 
 module.exports = (robot) ->
-  robot.respond /webshot (.*) (.*)/i, (res) ->
-    res.reply "this will snap #{res.match[1]} using profile #{res.match[2]}"
+  robot.respond /webshot (http|https)\:\/\/(.*) (.*)/i, (res) ->
+    [protocol, uri, profile] = res.match[1..3]
+    res.reply "this will snap #{protocol}://#{uri} using profile #{profile}"
 
   robot.respond /webshot list profiles/i, (res) ->
     res.reply "#{Object.keys(profiles).join(", ")}"
 
+  robot.respond /webshot describe (.*)/i, (res) ->
+    if res.match[1] of profiles
+      profile_desc = JSON.stringify(profiles[res.match[1]])
+    else
+      profile_desc = "Profile \"#{res.match[1]}\" not found"
+    res.reply profile_desc
 

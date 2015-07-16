@@ -27,9 +27,10 @@
 # Author:
 #   Dan Sullivan
 
-# Builtin Profiles
+# Built-in Profiles
 
 profiles = {
+  "default":{}
   "mobile": {
     "screenSize": {
       "width": 320,
@@ -44,12 +45,48 @@ profiles = {
 }
 
 module.exports = (robot) ->
-  robot.respond /webshot (http|https)\:\/\/(.*) (.*)/i, (res) ->
-    [protocol, uri, profile] = res.match[1..3]
-    res.reply "this will snap #{protocol}://#{uri} using profile #{profile}"
+  
+  # Populate variables from environment variables
+  aws_akid = process.env.HUBOT_AWS_ACCESS_KEY_ID
+  aws_sk = process.env.HUBOT_AWS_SECRET_ACCESS_KEY
+  aws_region = process.env.HUBOT_AWS_REGION
+  aws_s3_bucket = process.env.HUBOT_WEBSHOT_S3_BUCKET
+  # TODO: concat profiles if specified in env
+
+
+  robot.respond /webshot (https?\:\/\/.*) (.*)/i, (res) ->
+    webshot = require("webshot")
+    AWS = require("aws-sdk")
+
+    [url, profile] = res.match[1..2]
+    datestamp = new Date
+    datestamp = datestamp.toISOString().slice(0,10)
+    psrandomstr = Math.random().toString(36).replace(/[^a-zA-Z0-9]+/g, "").slice(1,9)
+
+    AWS.config.update({accessKeyId: aws_akid, secretAccessKey: aws_sk, region: aws_region});
+    s3bucket = new AWS.S3 {params: {Bucket: aws_s3_bucket}}
+
+    image_stream = webshot url, profiles[profile]
+
+    image_buffers = []
+    image_stream.on "data", (buffer) ->
+      image_buffers.push buffer
+    
+    image_stream.on "error", (err) ->
+      res.reply "Webshot error: " + err
+
+    image_stream.on "end", () ->
+      image_data = Buffer.concat(image_buffers);
+      params = {Key: "#{datestamp}-#{psrandomstr}.png", Body: image_data, ContentType: "image/png"}
+      s3bucket.upload params, (err, data) ->
+        if err
+          res.reply "S3 Upload error: " + err
+        else
+          res.reply data["Location"]
 
   robot.respond /webshot list profiles/i, (res) ->
     res.reply "#{Object.keys(profiles).join(", ")}"
+
 
   robot.respond /webshot describe (.*)/i, (res) ->
     if res.match[1] of profiles

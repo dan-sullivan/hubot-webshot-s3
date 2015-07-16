@@ -1,16 +1,16 @@
 {
   "name": "hubot-webshot-s3",
-  "description": "Take a webshot of a site, upload to s3 and return the url",
-  "version": "0.0.0",
+  "description": "Hubot script to take a webshot of a site, upload to s3 and return the url",
+  "version": "0.0.1",
   "author": "Dan Sullivan",
   "license": "MIT",
   "keywords": "hubot, hubot-scripts, webshot, s3",
   "repository": {
     "type": "git",
-    "url": "git://github.com/hubot-scripts/hubot-webshot-s3.git"
+    "url": "git://github.com/dan-sullivan/hubot-webshot-s3.git"
   },
   "bugs": {
-    "url": "https://github.com/hubot-scripts/hubot-webshot-s3/issues"
+    "url": "https://github.com/dan-sullivan/hubot-webshot-s3/issues"
   },
   "dependencies": {
     "phantomjs": "~1.9.17",
